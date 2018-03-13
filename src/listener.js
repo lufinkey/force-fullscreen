@@ -3,15 +3,15 @@ let TC = new ForceFullscreen();
 
 // listen to events from child/parent windows
 var TCrequests = [
-    'requestVideos',
-    'reportVideos',
-    'reportDone',
-    'maximizeVideo',
-    'minimizeVideo',
-    'addOverlay',
-    'removeOverlays',
-    'removeOverlay',
-    'requestEndFullscreen'
+    'ff_requestVideos',
+    'ff_reportVideos',
+    'ff_reportDone',
+    'ff_maximizeVideo',
+    'ff_minimizeVideo',
+    'ff_addOverlay',
+    'ff_removeOverlays',
+    'ff_removeOverlay',
+    'ff_requestEndFullscreen'
 ];
 
 window.addEventListener("message", function (event) {
@@ -22,31 +22,31 @@ window.addEventListener("message", function (event) {
 
     // process message
     switch (event.data.message) {
-        case 'requestVideos':
+        case 'ff_requestVideos':
             TC.findVideos(event.data.path);
             break;
-        case 'reportDone':
+        case 'ff_reportDone':
             TC.processReport();
             break;
-        case 'reportVideos':
+        case 'ff_reportVideos':
             TC.addVideos(event.source, event.data.videos);
             break;
-        case 'maximizeVideo':
+        case 'ff_maximizeVideo':
             TC.maximizeVideo(event.data.path);
             break;
-        case 'minimizeVideo':
+        case 'ff_minimizeVideo':
             TC.minimizeVideo();
             break;
-        case 'addOverlay':
+        case 'ff_addOverlay':
             TC.addOverlay(event.data.uid);
             break;
-        case 'removeOverlays':
+        case 'ff_removeOverlays':
             TC.removeOverlays();
             break;
-        case 'removeOverlay':
+        case 'ff_removeOverlay':
             TC.removeOverlay(event.data.uid);
             break;
-        case 'requestEndFullscreen':
+        case 'ff_requestEndFullscreen':
             TC.minimizeVideo();
             break;
     }
@@ -60,18 +60,18 @@ document.body.addEventListener('keydown', function (e) {
             default:
             case 'normal':
                 window.top.postMessage({
-                    message: 'requestVideos',
+                    message: 'ff_requestVideos',
                     path: []
                 }, '*');
                 break;
             case 'maximized':
                 window.top.postMessage({
-                    message: 'requestEndFullscreen'
+                    message: 'ff_requestEndFullscreen'
                 }, '*');
                 break;
             case 'overlay':
                 window.top.postMessage({
-                    message: 'removeOverlays'
+                    message: 'ff_removeOverlays'
                 }, '*');
                 break;
         }

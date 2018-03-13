@@ -132,7 +132,7 @@ ForceFullscreen.prototype.findVideos = function(path)
 		else {
 			// report results to top window
 			window.top.postMessage({
-				message: 'reportVideos',
+				message: 'ff_reportVideos',
 				videos: videos
 			}, '*');
 		}
@@ -149,7 +149,7 @@ ForceFullscreen.prototype.findVideos = function(path)
 			this.iframes[uid] = frame;
 			this.pendingReports++;
 			frame.contentWindow.postMessage({
-				message: 'requestVideos',
+				message: 'ff_requestVideos',
 				path: this.path.concat([uid])
 			}, '*');
 		}
@@ -197,7 +197,7 @@ ForceFullscreen.prototype.wrapUpReports = function()
 	if (window !== window.top) {
 		// signal parent that we're finished here
 		window.parent.postMessage({
-			message: 'reportDone'
+			message: 'ff_reportDone'
 		}, '*');
 	}
 	else
@@ -238,12 +238,11 @@ ForceFullscreen.prototype.wrapUpReports = function()
 			// no videos or images found
 			if (this.stage === "maximized") {
 				window.top.postMessage({
-					message: 'requestEndFullscreen'
+					message: 'ff_requestEndFullscreen'
 				}, '*');
 			}
 
 		}
-
 	}
 }
 
@@ -288,7 +287,7 @@ ForceFullscreen.prototype.maximizeVideo = function(path)
 
 		// communicate down
 		this.iframes[path[0]].contentWindow.postMessage({
-			message: 'maximizeVideo',
+			message: 'ff_maximizeVideo',
 			path: path.slice(1)
 		}, '*');
 
@@ -482,7 +481,7 @@ ForceFullscreen.prototype.minimizeVideo = function()
 
 	// tag-specific restorations
 	if (this.target.tag === "iframe") {
-		this.target.DOMnode.contentWindow.postMessage({message: 'minimizeVideo'}, '*');
+		this.target.DOMnode.contentWindow.postMessage({message: 'ff_minimizeVideo'}, '*');
 	}
 	else if (this.target.tag === "video") {
 		if (this.target.isYTHTML5) {
@@ -593,7 +592,7 @@ ForceFullscreen.prototype.addOverlays = function()
 		}
 		else {
 			video.window.postMessage({
-				message: 'addOverlay',
+				message: 'ff_addOverlay',
 				uid: video.uid
 			}, '*');
 		}
@@ -613,7 +612,7 @@ ForceFullscreen.prototype.removeOverlays = function()
 		}
 		else {
 			video.window.postMessage({
-				message: 'removeOverlay',
+				message: 'ff_removeOverlay',
 				uid: video.uid
 			}, '*');
 		}
@@ -669,7 +668,7 @@ ForceFullscreen.prototype.handleOverlayClick = function(e)
 {
 	var uid = e.target.getAttribute('videoUid');
 	window.top.postMessage({
-		message: 'maximizeVideo',
+		message: 'ff_maximizeVideo',
 		path: this.path.concat([uid])
 	}, '*');
 	e.preventDefault();
@@ -1030,7 +1029,7 @@ ForceFullscreen.prototype.createHTML5Controls = function(node)
 
 		exitFullScreen: function (e) {
 			window.top.postMessage({
-				message: 'requestEndFullscreen'
+				message: 'ff_requestEndFullscreen'
 			}, '*');
 			e.stopPropagation();
 		},
