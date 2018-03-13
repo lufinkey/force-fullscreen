@@ -1,0 +1,26 @@
+{
+  "name": "force-fullscreen",
+  "version": "1.0.0",
+  "description": "Force \"cinema\" DOM elements to be fullscreen",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lufinkey/force-fullscreen.git"
+  },
+  "keywords": [
+    "fullscreen",
+    "full",
+    "screen",
+    "maximize",
+    "video"
+  ],
+  "author": "",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/lufinkey/force-fullscreen/issues"
+  },
+  "homepage": "https://github.com/lufinkey/force-fullscreen#readme"
+}

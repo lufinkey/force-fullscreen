@@ -3,8 +3,6 @@ This file has been modified from another software project
 Check out https://github.com/jossef/fullscreen-window for the original
 */
 
-
-
 function ForceFullscreen()
 {
 	// options
