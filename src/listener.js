@@ -1,5 +1,5 @@
 
-let TC = new ForceFullscreen();
+let TC = new TabCinema();
 
 // listen to events from child/parent windows
 var TCrequests = [

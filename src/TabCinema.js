@@ -3,7 +3,7 @@ This file has been modified from another software project
 Check out https://github.com/jossef/fullscreen-window for the original
 */
 
-function ForceFullscreen()
+function TabCinema()
 {
 	// options
 	this.options = {
@@ -64,7 +64,7 @@ function ForceFullscreen()
 
 
 // find all videos on this page
-ForceFullscreen.prototype.findVideos = function(path)
+TabCinema.prototype.findVideos = function(path)
 {
 	// store path for later reference
 	this.path = path;
@@ -170,7 +170,7 @@ ForceFullscreen.prototype.findVideos = function(path)
 
 
 // top window: handle reports of videos in iframes
-ForceFullscreen.prototype.addVideos = function(parentWindow, videos)
+TabCinema.prototype.addVideos = function(parentWindow, videos)
 {
 	for (var i in videos) {
 		videos[i].window = parentWindow;
@@ -181,7 +181,7 @@ ForceFullscreen.prototype.addVideos = function(parentWindow, videos)
 
 
 // iframe reporting in
-ForceFullscreen.prototype.processReport = function()
+TabCinema.prototype.processReport = function()
 {
 	if (--this.pendingReports === 0) {
 		window.clearTimeout(this.wrapUpTimeout);
@@ -192,7 +192,7 @@ ForceFullscreen.prototype.processReport = function()
 
 
 // after all reports have come in, or timeout occured, take action
-ForceFullscreen.prototype.wrapUpReports = function()
+TabCinema.prototype.wrapUpReports = function()
 {
 	if (window !== window.top) {
 		// signal parent that we're finished here
@@ -249,7 +249,7 @@ ForceFullscreen.prototype.wrapUpReports = function()
 
 
 // start the maximizing process for a single video
-ForceFullscreen.prototype.maximizeVideo = function(path)
+TabCinema.prototype.maximizeVideo = function(path)
 {
 	// state-dependent first action
 	if (this.state === "maximized") {
@@ -402,7 +402,7 @@ ForceFullscreen.prototype.maximizeVideo = function(path)
 
 
 // Maximize action DOM manipulations
-ForceFullscreen.prototype.maximizeTarget = function()
+TabCinema.prototype.maximizeTarget = function()
 {
 	var el = this.target.DOMnode;
 
@@ -466,7 +466,7 @@ ForceFullscreen.prototype.maximizeTarget = function()
 
 
 // Minimize the active video
-ForceFullscreen.prototype.minimizeVideo = function()
+TabCinema.prototype.minimizeVideo = function()
 {
 	// restore state
 	this.state = "normal";
@@ -531,7 +531,7 @@ ForceFullscreen.prototype.minimizeVideo = function()
 
 
 // Minimize video DOM actions
-ForceFullscreen.prototype.minimizeTarget = function()
+TabCinema.prototype.minimizeTarget = function()
 {
 	if (!this.target.DOMnode) {
 		// this can occur if the video was removed
@@ -582,7 +582,7 @@ ForceFullscreen.prototype.minimizeTarget = function()
 
 
 // show a button on top of each video
-ForceFullscreen.prototype.addOverlays = function()
+TabCinema.prototype.addOverlays = function()
 {
 	this.state = 'overlay';
 	for (var i = 0; i < this.allVideos.length; i++) {
@@ -602,7 +602,7 @@ ForceFullscreen.prototype.addOverlays = function()
 
 
 // remove overlays over videos
-ForceFullscreen.prototype.removeOverlays = function()
+TabCinema.prototype.removeOverlays = function()
 {
 	this.state = 'normal';
 	for (var i = 0; i < this.allVideos.length; i++) {
@@ -622,7 +622,7 @@ ForceFullscreen.prototype.removeOverlays = function()
 
 
 // create and insert overlay button
-ForceFullscreen.prototype.addOverlay = function(uid)
+TabCinema.prototype.addOverlay = function(uid)
 {
 	var el = this.myVideos[uid];
 	var div = document.createElement('div');
@@ -650,7 +650,7 @@ ForceFullscreen.prototype.addOverlay = function(uid)
 
 
 // remove overlay button
-ForceFullscreen.prototype.removeOverlay = function(uid)
+TabCinema.prototype.removeOverlay = function(uid)
 {
 	var overlays = document.querySelectorAll('.tc-overlay');
 	for (var i = 0; i < overlays.length; i++) {
@@ -664,7 +664,7 @@ ForceFullscreen.prototype.removeOverlay = function(uid)
 
 
 // handle click on overlay
-ForceFullscreen.prototype.handleOverlayClick = function(e)
+TabCinema.prototype.handleOverlayClick = function(e)
 {
 	var uid = e.target.getAttribute('videoUid');
 	window.top.postMessage({
@@ -678,7 +678,7 @@ ForceFullscreen.prototype.handleOverlayClick = function(e)
 
 
 // handle changes in the document (such as occur in playlists when the video is replaced)
-ForceFullscreen.prototype.handleMutations = function(mutations)
+TabCinema.prototype.handleMutations = function(mutations)
 {
 	if (!this.hasClass(document.body, "tc-show")) {
 		window.clearTimeout(this.handleVideoRemoveTimeout);
@@ -703,7 +703,7 @@ ForceFullscreen.prototype.handleMutations = function(mutations)
 
 
 // action to take when the video was removed from the DOM
-ForceFullscreen.prototype.handleVideoRemoved = function()
+TabCinema.prototype.handleVideoRemoved = function()
 {
 	// find next video to maximize if current one is removed
 	this.findVideos([]);
@@ -712,7 +712,7 @@ ForceFullscreen.prototype.handleVideoRemoved = function()
 
 
 // show youtube html5 controls upons mousemove
-ForceFullscreen.prototype.handleYTHTML5MouseMove = function(e)
+TabCinema.prototype.handleYTHTML5MouseMove = function(e)
 {
 	var onControls = e.clientY > window.innerHeight - 40;
 	var controls = this.target.YTHTML5controls;
@@ -734,7 +734,7 @@ ForceFullscreen.prototype.handleYTHTML5MouseMove = function(e)
 
 
 // jQuery hasClass function
-ForceFullscreen.prototype.hasClass = function(node, selector)
+TabCinema.prototype.hasClass = function(node, selector)
 {
 	var className = " " + selector + " ";
 	if (node.nodeType === 1 && (" " + node.className + " ").replace(/[\t\r\n\f]/g, " ").indexOf(className) >= 0) {
@@ -748,7 +748,7 @@ ForceFullscreen.prototype.hasClass = function(node, selector)
 
 
 // add class to element and all children (recursively)
-ForceFullscreen.prototype.addClassDeep = function(el, cls)
+TabCinema.prototype.addClassDeep = function(el, cls)
 {
 	if (el.classList) {
 		el.classList.add(cls);
@@ -762,7 +762,7 @@ ForceFullscreen.prototype.addClassDeep = function(el, cls)
 
 
 // remove class from element and all children (recursively)
-ForceFullscreen.prototype.removeClassDeep = function(el, cls)
+TabCinema.prototype.removeClassDeep = function(el, cls)
 {
 	if (el.classList) {
 		el.classList.remove(cls);
@@ -776,14 +776,14 @@ ForceFullscreen.prototype.removeClassDeep = function(el, cls)
 
 
 // determine if element is currently visible
-ForceFullscreen.prototype.isVisible = function(el)
+TabCinema.prototype.isVisible = function(el)
 {
 	return (el.clientWidth > 0 || el.clientHeight > 0) && window.getComputedStyle(el).visibility !== 'hidden';
 }
 
 
 
-ForceFullscreen.prototype.getOffset = function(el)
+TabCinema.prototype.getOffset = function(el)
 {
 	var offset = {left: 0, top: 0};
 	do {
@@ -795,7 +795,7 @@ ForceFullscreen.prototype.getOffset = function(el)
 
 
 
-ForceFullscreen.prototype.fractionInViewport = function(el)
+TabCinema.prototype.fractionInViewport = function(el)
 {
 	var rect = el.getBoundingClientRect();
 	var visibleRect = {
@@ -812,7 +812,7 @@ ForceFullscreen.prototype.fractionInViewport = function(el)
 
 
 
-ForceFullscreen.prototype.getPlayer = function(el)
+TabCinema.prototype.getPlayer = function(el)
 {
 	if (el.nodeName.toLowerCase() === 'video') {
 		return "html5";
@@ -830,7 +830,7 @@ ForceFullscreen.prototype.getPlayer = function(el)
 
 
 
-ForceFullscreen.prototype.getQuality = function (el)
+TabCinema.prototype.getQuality = function (el)
 {
 	var player = this.getPlayer(el);
 	if (player === "yt") {
@@ -846,7 +846,7 @@ ForceFullscreen.prototype.getQuality = function (el)
 
 
 
-ForceFullscreen.prototype.setQuality = function(el, q)
+TabCinema.prototype.setQuality = function(el, q)
 {
 	var player = this.getPlayer(el);
 	if (player === "yt") {
@@ -868,7 +868,7 @@ ForceFullscreen.prototype.setQuality = function(el, q)
 
 
 
-ForceFullscreen.prototype.createHTML5Controls = function(node)
+TabCinema.prototype.createHTML5Controls = function(node)
 {
 	var html5controls = {
 
