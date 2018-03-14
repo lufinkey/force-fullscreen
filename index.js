@@ -114,33 +114,6 @@ TabCinema.initialize = function()
 				break;
 		}
 	}, false);
-
-	// listen to shortcut key
-	document.body.addEventListener('keydown', (e) => {
-		if ((e.keyCode === 32 && e.ctrlKey) || (e.keyCode === 27 && (this.state === 'maximized' || this.state === 'overlay'))) {
-			switch (this.state) {
-				default:
-				case 'normal':
-					window.top.postMessage({
-						message: 'tc_requestVideos',
-						path: []
-					}, '*');
-					break;
-				case 'maximized':
-					window.top.postMessage({
-						message: 'tc_requestEndFullscreen'
-					}, '*');
-					break;
-				case 'overlay':
-					window.top.postMessage({
-						message: 'tc_removeOverlays'
-					}, '*');
-					break;
-			}
-			e.stopPropagation();
-			e.preventDefault();
-		}
-	});
 }
 
 
