@@ -5,6 +5,8 @@ Check out https://github.com/jossef/fullscreen-window for the original
 
 const TabCinema = {};
 
+
+
 TabCinema.initialize = function()
 {
 	// options
