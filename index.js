@@ -66,15 +66,15 @@ TabCinema.initialize = function()
 	
 	// listen to events from child/parent windows
 	var TCrequests = [
-		'ff_requestVideos',
-		'ff_reportVideos',
-		'ff_reportDone',
-		'ff_maximizeVideo',
-		'ff_minimizeVideo',
-		'ff_addOverlay',
-		'ff_removeOverlays',
-		'ff_removeOverlay',
-		'ff_requestEndFullscreen'
+		'tc_requestVideos',
+		'tc_reportVideos',
+		'tc_reportDone',
+		'tc_maximizeVideo',
+		'tc_minimizeVideo',
+		'tc_addOverlay',
+		'tc_removeOverlays',
+		'tc_removeOverlay',
+		'tc_requestEndFullscreen'
 	];
 
 	window.addEventListener("message", (event) => {
@@ -85,31 +85,31 @@ TabCinema.initialize = function()
 
 		// process message
 		switch (event.data.message) {
-			case 'ff_requestVideos':
+			case 'tc_requestVideos':
 				this.findVideos(event.data.path);
 				break;
-			case 'ff_reportDone':
+			case 'tc_reportDone':
 				this.processReport();
 				break;
-			case 'ff_reportVideos':
+			case 'tc_reportVideos':
 				this.addVideos(event.source, event.data.videos);
 				break;
-			case 'ff_maximizeVideo':
+			case 'tc_maximizeVideo':
 				this.maximizeVideo(event.data.path);
 				break;
-			case 'ff_minimizeVideo':
+			case 'tc_minimizeVideo':
 				this.minimizeVideo();
 				break;
-			case 'ff_addOverlay':
+			case 'tc_addOverlay':
 				this.addOverlay(event.data.uid);
 				break;
-			case 'ff_removeOverlays':
+			case 'tc_removeOverlays':
 				this.removeOverlays();
 				break;
-			case 'ff_removeOverlay':
+			case 'tc_removeOverlay':
 				this.removeOverlay(event.data.uid);
 				break;
-			case 'ff_requestEndFullscreen':
+			case 'tc_requestEndFullscreen':
 				this.minimizeVideo();
 				break;
 		}
@@ -122,18 +122,18 @@ TabCinema.initialize = function()
 				default:
 				case 'normal':
 					window.top.postMessage({
-						message: 'ff_requestVideos',
+						message: 'tc_requestVideos',
 						path: []
 					}, '*');
 					break;
 				case 'maximized':
 					window.top.postMessage({
-						message: 'ff_requestEndFullscreen'
+						message: 'tc_requestEndFullscreen'
 					}, '*');
 					break;
 				case 'overlay':
 					window.top.postMessage({
-						message: 'ff_removeOverlays'
+						message: 'tc_removeOverlays'
 					}, '*');
 					break;
 			}
@@ -214,7 +214,7 @@ TabCinema.findVideos = function(path)
 		else {
 			// report results to top window
 			window.top.postMessage({
-				message: 'ff_reportVideos',
+				message: 'tc_reportVideos',
 				videos: videos
 			}, '*');
 		}
@@ -231,7 +231,7 @@ TabCinema.findVideos = function(path)
 			this.iframes[uid] = frame;
 			this.pendingReports++;
 			frame.contentWindow.postMessage({
-				message: 'ff_requestVideos',
+				message: 'tc_requestVideos',
 				path: this.path.concat([uid])
 			}, '*');
 		}
@@ -279,7 +279,7 @@ TabCinema.wrapUpReports = function()
 	if (window !== window.top) {
 		// signal parent that we're finished here
 		window.parent.postMessage({
-			message: 'ff_reportDone'
+			message: 'tc_reportDone'
 		}, '*');
 	}
 	else
@@ -320,7 +320,7 @@ TabCinema.wrapUpReports = function()
 			// no videos or images found
 			if (this.stage === "maximized") {
 				window.top.postMessage({
-					message: 'ff_requestEndFullscreen'
+					message: 'tc_requestEndFullscreen'
 				}, '*');
 			}
 
@@ -369,7 +369,7 @@ TabCinema.maximizeVideo = function(path)
 
 		// communicate down
 		this.iframes[path[0]].contentWindow.postMessage({
-			message: 'ff_maximizeVideo',
+			message: 'tc_maximizeVideo',
 			path: path.slice(1)
 		}, '*');
 
@@ -563,7 +563,7 @@ TabCinema.minimizeVideo = function()
 
 	// tag-specific restorations
 	if (this.target.tag === "iframe") {
-		this.target.DOMnode.contentWindow.postMessage({message: 'ff_minimizeVideo'}, '*');
+		this.target.DOMnode.contentWindow.postMessage({message: 'tc_minimizeVideo'}, '*');
 	}
 	else if (this.target.tag === "video") {
 		if (this.target.isYTHTML5) {
@@ -674,7 +674,7 @@ TabCinema.addOverlays = function()
 		}
 		else {
 			video.window.postMessage({
-				message: 'ff_addOverlay',
+				message: 'tc_addOverlay',
 				uid: video.uid
 			}, '*');
 		}
@@ -694,7 +694,7 @@ TabCinema.removeOverlays = function()
 		}
 		else {
 			video.window.postMessage({
-				message: 'ff_removeOverlay',
+				message: 'tc_removeOverlay',
 				uid: video.uid
 			}, '*');
 		}
@@ -750,7 +750,7 @@ TabCinema.handleOverlayClick = function(e)
 {
 	var uid = e.target.getAttribute('videoUid');
 	window.top.postMessage({
-		message: 'ff_maximizeVideo',
+		message: 'tc_maximizeVideo',
 		path: this.path.concat([uid])
 	}, '*');
 	e.preventDefault();
@@ -1111,7 +1111,7 @@ TabCinema.createHTML5Controls = function(node)
 
 		exitFullScreen: function (e) {
 			window.top.postMessage({
-				message: 'ff_requestEndFullscreen'
+				message: 'tc_requestEndFullscreen'
 			}, '*');
 			e.stopPropagation();
 		},
