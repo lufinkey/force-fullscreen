@@ -473,7 +473,7 @@ TabCinema.maximizeVideo = function(path)
 	if (this.state !== "maximized") {
 
 		// create an observer instance to register changes in the document while maximized
-		this.removedObserver = new MutationObserver(this.handleMutations);
+		this.removedObserver = new MutationObserver(this.handleMutations.bind(this));
 		this.removedObserver.observe(document.body, {childList: true, subtree: true});
 
 		// set new state
