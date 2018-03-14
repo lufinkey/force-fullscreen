@@ -1,5 +1,5 @@
 {
-  "name": "force-fullscreen",
+  "name": "tabcinema",
   "version": "1.0.0",
   "description": "Force \"cinema\" DOM elements to be fullscreen",
   "main": "index.js",
@@ -8,19 +8,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lufinkey/force-fullscreen.git"
+    "url": "git+https://github.com/lufinkey/tabcinema.git"
   },
   "keywords": [
     "fullscreen",
     "full",
     "screen",
     "maximize",
-    "video"
+	"video",
+	"cinema",
+	"tab",
+	"browser"
   ],
   "author": "",
   "license": "SEE LICENSE IN LICENSE",
   "bugs": {
-    "url": "https://github.com/lufinkey/force-fullscreen/issues"
+    "url": "https://github.com/lufinkey/tabcinema/issues"
   },
-  "homepage": "https://github.com/lufinkey/force-fullscreen#readme"
+  "homepage": "https://github.com/lufinkey/tabcinema#readme"
 }
