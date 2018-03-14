@@ -1235,3 +1235,11 @@ TabCinema.setFullscreen = function(fullscreen)
 
 // initialize TabCinema
 TabCinema.initialize();
+
+
+
+// export if module
+if(typeof module !== 'undefined')
+{
+	module.exports = TabCinema;
+}
