@@ -3,7 +3,9 @@ This file has been modified from another software project
 Check out https://github.com/jossef/fullscreen-window for the original
 */
 
-function TabCinema()
+const TabCinema = {};
+
+TabCinema.initialize = function()
 {
 	// options
 	this.options = {
@@ -59,12 +61,90 @@ function TabCinema()
 		visibility	: visible	!important;\
 		border-width: 0			!important;\
 		background	: black		!important;";
+	
+	// listen to events from child/parent windows
+	var TCrequests = [
+		'ff_requestVideos',
+		'ff_reportVideos',
+		'ff_reportDone',
+		'ff_maximizeVideo',
+		'ff_minimizeVideo',
+		'ff_addOverlay',
+		'ff_removeOverlays',
+		'ff_removeOverlay',
+		'ff_requestEndFullscreen'
+	];
+
+	window.addEventListener("message", (event) => {
+		if (TCrequests.indexOf(event.data.message) === -1) {
+			// do not respond to messages that do not belong to TC
+			return;
+		}
+
+		// process message
+		switch (event.data.message) {
+			case 'ff_requestVideos':
+				TC.findVideos(event.data.path);
+				break;
+			case 'ff_reportDone':
+				TC.processReport();
+				break;
+			case 'ff_reportVideos':
+				TC.addVideos(event.source, event.data.videos);
+				break;
+			case 'ff_maximizeVideo':
+				TC.maximizeVideo(event.data.path);
+				break;
+			case 'ff_minimizeVideo':
+				TC.minimizeVideo();
+				break;
+			case 'ff_addOverlay':
+				TC.addOverlay(event.data.uid);
+				break;
+			case 'ff_removeOverlays':
+				TC.removeOverlays();
+				break;
+			case 'ff_removeOverlay':
+				TC.removeOverlay(event.data.uid);
+				break;
+			case 'ff_requestEndFullscreen':
+				TC.minimizeVideo();
+				break;
+		}
+	}, false);
+
+	// listen to shortcut key
+	document.body.addEventListener('keydown', (e) => {
+		if ((e.keyCode === 32 && e.ctrlKey) || (e.keyCode === 27 && (TC.state === 'maximized' || TC.state === 'overlay'))) {
+			switch (TC.state) {
+				default:
+				case 'normal':
+					window.top.postMessage({
+						message: 'ff_requestVideos',
+						path: []
+					}, '*');
+					break;
+				case 'maximized':
+					window.top.postMessage({
+						message: 'ff_requestEndFullscreen'
+					}, '*');
+					break;
+				case 'overlay':
+					window.top.postMessage({
+						message: 'ff_removeOverlays'
+					}, '*');
+					break;
+			}
+			e.stopPropagation();
+			e.preventDefault();
+		}
+	});
 }
 
 
 
 // find all videos on this page
-TabCinema.prototype.findVideos = function(path)
+TabCinema.findVideos = function(path)
 {
 	// store path for later reference
 	this.path = path;
@@ -170,7 +250,7 @@ TabCinema.prototype.findVideos = function(path)
 
 
 // top window: handle reports of videos in iframes
-TabCinema.prototype.addVideos = function(parentWindow, videos)
+TabCinema.addVideos = function(parentWindow, videos)
 {
 	for (var i in videos) {
 		videos[i].window = parentWindow;
@@ -181,7 +261,7 @@ TabCinema.prototype.addVideos = function(parentWindow, videos)
 
 
 // iframe reporting in
-TabCinema.prototype.processReport = function()
+TabCinema.processReport = function()
 {
 	if (--this.pendingReports === 0) {
 		window.clearTimeout(this.wrapUpTimeout);
@@ -192,7 +272,7 @@ TabCinema.prototype.processReport = function()
 
 
 // after all reports have come in, or timeout occured, take action
-TabCinema.prototype.wrapUpReports = function()
+TabCinema.wrapUpReports = function()
 {
 	if (window !== window.top) {
 		// signal parent that we're finished here
@@ -249,7 +329,7 @@ TabCinema.prototype.wrapUpReports = function()
 
 
 // start the maximizing process for a single video
-TabCinema.prototype.maximizeVideo = function(path)
+TabCinema.maximizeVideo = function(path)
 {
 	// state-dependent first action
 	if (this.state === "maximized") {
@@ -402,7 +482,7 @@ TabCinema.prototype.maximizeVideo = function(path)
 
 
 // Maximize action DOM manipulations
-TabCinema.prototype.maximizeTarget = function()
+TabCinema.maximizeTarget = function()
 {
 	var el = this.target.DOMnode;
 
@@ -466,7 +546,7 @@ TabCinema.prototype.maximizeTarget = function()
 
 
 // Minimize the active video
-TabCinema.prototype.minimizeVideo = function()
+TabCinema.minimizeVideo = function()
 {
 	// restore state
 	this.state = "normal";
@@ -531,7 +611,7 @@ TabCinema.prototype.minimizeVideo = function()
 
 
 // Minimize video DOM actions
-TabCinema.prototype.minimizeTarget = function()
+TabCinema.minimizeTarget = function()
 {
 	if (!this.target.DOMnode) {
 		// this can occur if the video was removed
@@ -582,7 +662,7 @@ TabCinema.prototype.minimizeTarget = function()
 
 
 // show a button on top of each video
-TabCinema.prototype.addOverlays = function()
+TabCinema.addOverlays = function()
 {
 	this.state = 'overlay';
 	for (var i = 0; i < this.allVideos.length; i++) {
@@ -602,7 +682,7 @@ TabCinema.prototype.addOverlays = function()
 
 
 // remove overlays over videos
-TabCinema.prototype.removeOverlays = function()
+TabCinema.removeOverlays = function()
 {
 	this.state = 'normal';
 	for (var i = 0; i < this.allVideos.length; i++) {
@@ -622,7 +702,7 @@ TabCinema.prototype.removeOverlays = function()
 
 
 // create and insert overlay button
-TabCinema.prototype.addOverlay = function(uid)
+TabCinema.addOverlay = function(uid)
 {
 	var el = this.myVideos[uid];
 	var div = document.createElement('div');
@@ -650,7 +730,7 @@ TabCinema.prototype.addOverlay = function(uid)
 
 
 // remove overlay button
-TabCinema.prototype.removeOverlay = function(uid)
+TabCinema.removeOverlay = function(uid)
 {
 	var overlays = document.querySelectorAll('.tc-overlay');
 	for (var i = 0; i < overlays.length; i++) {
@@ -664,7 +744,7 @@ TabCinema.prototype.removeOverlay = function(uid)
 
 
 // handle click on overlay
-TabCinema.prototype.handleOverlayClick = function(e)
+TabCinema.handleOverlayClick = function(e)
 {
 	var uid = e.target.getAttribute('videoUid');
 	window.top.postMessage({
@@ -678,7 +758,7 @@ TabCinema.prototype.handleOverlayClick = function(e)
 
 
 // handle changes in the document (such as occur in playlists when the video is replaced)
-TabCinema.prototype.handleMutations = function(mutations)
+TabCinema.handleMutations = function(mutations)
 {
 	if (!this.hasClass(document.body, "tc-show")) {
 		window.clearTimeout(this.handleVideoRemoveTimeout);
@@ -703,7 +783,7 @@ TabCinema.prototype.handleMutations = function(mutations)
 
 
 // action to take when the video was removed from the DOM
-TabCinema.prototype.handleVideoRemoved = function()
+TabCinema.handleVideoRemoved = function()
 {
 	// find next video to maximize if current one is removed
 	this.findVideos([]);
@@ -712,7 +792,7 @@ TabCinema.prototype.handleVideoRemoved = function()
 
 
 // show youtube html5 controls upons mousemove
-TabCinema.prototype.handleYTHTML5MouseMove = function(e)
+TabCinema.handleYTHTML5MouseMove = function(e)
 {
 	var onControls = e.clientY > window.innerHeight - 40;
 	var controls = this.target.YTHTML5controls;
@@ -734,7 +814,7 @@ TabCinema.prototype.handleYTHTML5MouseMove = function(e)
 
 
 // jQuery hasClass function
-TabCinema.prototype.hasClass = function(node, selector)
+TabCinema.hasClass = function(node, selector)
 {
 	var className = " " + selector + " ";
 	if (node.nodeType === 1 && (" " + node.className + " ").replace(/[\t\r\n\f]/g, " ").indexOf(className) >= 0) {
@@ -748,7 +828,7 @@ TabCinema.prototype.hasClass = function(node, selector)
 
 
 // add class to element and all children (recursively)
-TabCinema.prototype.addClassDeep = function(el, cls)
+TabCinema.addClassDeep = function(el, cls)
 {
 	if (el.classList) {
 		el.classList.add(cls);
@@ -762,7 +842,7 @@ TabCinema.prototype.addClassDeep = function(el, cls)
 
 
 // remove class from element and all children (recursively)
-TabCinema.prototype.removeClassDeep = function(el, cls)
+TabCinema.removeClassDeep = function(el, cls)
 {
 	if (el.classList) {
 		el.classList.remove(cls);
@@ -776,14 +856,14 @@ TabCinema.prototype.removeClassDeep = function(el, cls)
 
 
 // determine if element is currently visible
-TabCinema.prototype.isVisible = function(el)
+TabCinema.isVisible = function(el)
 {
 	return (el.clientWidth > 0 || el.clientHeight > 0) && window.getComputedStyle(el).visibility !== 'hidden';
 }
 
 
 
-TabCinema.prototype.getOffset = function(el)
+TabCinema.getOffset = function(el)
 {
 	var offset = {left: 0, top: 0};
 	do {
@@ -795,7 +875,7 @@ TabCinema.prototype.getOffset = function(el)
 
 
 
-TabCinema.prototype.fractionInViewport = function(el)
+TabCinema.fractionInViewport = function(el)
 {
 	var rect = el.getBoundingClientRect();
 	var visibleRect = {
@@ -812,7 +892,7 @@ TabCinema.prototype.fractionInViewport = function(el)
 
 
 
-TabCinema.prototype.getPlayer = function(el)
+TabCinema.getPlayer = function(el)
 {
 	if (el.nodeName.toLowerCase() === 'video') {
 		return "html5";
@@ -830,7 +910,7 @@ TabCinema.prototype.getPlayer = function(el)
 
 
 
-TabCinema.prototype.getQuality = function (el)
+TabCinema.getQuality = function (el)
 {
 	var player = this.getPlayer(el);
 	if (player === "yt") {
@@ -846,7 +926,7 @@ TabCinema.prototype.getQuality = function (el)
 
 
 
-TabCinema.prototype.setQuality = function(el, q)
+TabCinema.setQuality = function(el, q)
 {
 	var player = this.getPlayer(el);
 	if (player === "yt") {
@@ -868,7 +948,7 @@ TabCinema.prototype.setQuality = function(el, q)
 
 
 
-TabCinema.prototype.createHTML5Controls = function(node)
+TabCinema.createHTML5Controls = function(node)
 {
 	var html5controls = {
 
@@ -1101,3 +1181,28 @@ TabCinema.prototype.createHTML5Controls = function(node)
 
 	return html5controls;
 }
+
+
+
+
+/*========= MAIN FUNCTIONS =========*/
+
+TabCinema.toggle = function()
+{
+	switch (this.state) {
+		case 'normal':
+			TC.findVideos([]);
+			break;
+		case 'maximized':
+			TC.minimizeVideo();
+			break;
+		case 'overlay':
+			TC.removeOverlays();
+			break;
+	}
+}
+
+
+
+// initialize TabCinema
+TabCinema.initialize();
