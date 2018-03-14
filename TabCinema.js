@@ -86,39 +86,39 @@ TabCinema.initialize = function()
 		// process message
 		switch (event.data.message) {
 			case 'ff_requestVideos':
-				TC.findVideos(event.data.path);
+				this.findVideos(event.data.path);
 				break;
 			case 'ff_reportDone':
-				TC.processReport();
+				this.processReport();
 				break;
 			case 'ff_reportVideos':
-				TC.addVideos(event.source, event.data.videos);
+				this.addVideos(event.source, event.data.videos);
 				break;
 			case 'ff_maximizeVideo':
-				TC.maximizeVideo(event.data.path);
+				this.maximizeVideo(event.data.path);
 				break;
 			case 'ff_minimizeVideo':
-				TC.minimizeVideo();
+				this.minimizeVideo();
 				break;
 			case 'ff_addOverlay':
-				TC.addOverlay(event.data.uid);
+				this.addOverlay(event.data.uid);
 				break;
 			case 'ff_removeOverlays':
-				TC.removeOverlays();
+				this.removeOverlays();
 				break;
 			case 'ff_removeOverlay':
-				TC.removeOverlay(event.data.uid);
+				this.removeOverlay(event.data.uid);
 				break;
 			case 'ff_requestEndFullscreen':
-				TC.minimizeVideo();
+				this.minimizeVideo();
 				break;
 		}
 	}, false);
 
 	// listen to shortcut key
 	document.body.addEventListener('keydown', (e) => {
-		if ((e.keyCode === 32 && e.ctrlKey) || (e.keyCode === 27 && (TC.state === 'maximized' || TC.state === 'overlay'))) {
-			switch (TC.state) {
+		if ((e.keyCode === 32 && e.ctrlKey) || (e.keyCode === 27 && (this.state === 'maximized' || this.state === 'overlay'))) {
+			switch (this.state) {
 				default:
 				case 'normal':
 					window.top.postMessage({
@@ -1189,18 +1189,45 @@ TabCinema.createHTML5Controls = function(node)
 
 /*========= MAIN FUNCTIONS =========*/
 
+// toggle fullscreen mode
 TabCinema.toggle = function()
 {
-	switch (this.state) {
+	switch(this.state)
+	{
 		case 'normal':
-			TC.findVideos([]);
+			this.findVideos([]);
 			break;
 		case 'maximized':
-			TC.minimizeVideo();
+			this.minimizeVideo();
 			break;
 		case 'overlay':
-			TC.removeOverlays();
+			this.removeOverlays();
 			break;
+	}
+}
+
+
+
+// set fullscreen / not fullscreen
+TabCinema.setFullscreen = function(fullscreen)
+{
+	if(fullscreen)
+	{
+		if(this.state === 'normal')
+		{
+			this.findVideos([]);
+		}
+	}
+	else
+	{
+		if(this.state == 'maximized')
+		{
+			this.minimizeVideo();
+		}
+		else if(this.state === 'overlay')
+		{
+			this.removeOverlays();
+		}
 	}
 }
 
