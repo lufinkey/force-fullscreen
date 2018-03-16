@@ -103,6 +103,8 @@ TabCinema.initialize = function()
 	this.handleVideoRemoveTimeout = 0;
 	this.wrapUpTimeout = 0;
 	this.pendingReports = 0;
+	this.videoCallbacks = [];
+	this.findingVideos = false;
 	this.inlineStyleSubtle = "\
 		clear		: none		!important;\
 		top			: 0			!important;\
@@ -196,8 +198,18 @@ TabCinema.initialize = function()
 
 
 // find all videos on this page
-TabCinema.findVideos = function(path)
+TabCinema.findVideos = function(path=[], callback=null)
 {
+	if(this.findingVideos)
+	{
+		if(callback)
+		{
+			this.videoCallbacks.push(callback);
+		}
+		return;
+	}
+	this.findingVideos = true;
+	
 	// store path for later reference
 	this.path = path;
 
@@ -210,7 +222,6 @@ TabCinema.findVideos = function(path)
 	var videos = [];
 	var elmts = document.querySelectorAll(this.options.scanTags.join(','));
 	for (var i = 0; i < elmts.length; i++) {
-
 		var el = elmts[i];
 
 		// skip tiny elements
@@ -253,7 +264,6 @@ TabCinema.findVideos = function(path)
 
 		// add to private video collection
 		this.myVideos[uid] = el;
-
 	}
 
 	// send videos collection to wrap-up function
@@ -268,6 +278,12 @@ TabCinema.findVideos = function(path)
 				videos: videos
 			}, '*');
 		}
+	}
+
+	// add callback to video callbacks
+	if(callback)
+	{
+		this.videoCallbacks.push(callback);
 	}
 
 	// then tell all iframes to report their videos
@@ -332,49 +348,61 @@ TabCinema.wrapUpReports = function()
 			message: 'tc_reportDone'
 		}, '*');
 	}
-	else
+	this.findingVideos = false;
+	// call callbacks
+	var videoCallbacks = this.videoCallbacks;
+	this.videoCallbacks = [];
+	for(const callback of videoCallbacks)
 	{
-		// all reports are in... find out which video to maximize
-		if (this.allVideos.length === 1) {
+		callback();
+	}
+}
 
-			// only one candidate -> maximize that one
-			this.maximizeVideo(this.allVideos[0].path);
 
+
+// maximize the focused element
+TabCinema.maximize = function()
+{
+	// all reports are in... find out which video to maximize
+	if (this.allVideos.length === 1) {
+
+		// only one candidate -> maximize that one
+		this.maximizeVideo(this.allVideos[0].path);
+
+	}
+	else if (this.allVideos.length > 1) {
+
+		// multiple candidates -> videos take precedence
+		var videoCount = 0, videoIndex = 0;
+		for (var i = 0; i < this.allVideos.length; i++) {
+			if (this.allVideos[i].tag !== 'img') {
+				videoCount++;
+				videoIndex = i;
+			}
 		}
-		else if (this.allVideos.length > 1) {
 
-			// multiple candidates -> videos take precedence
-			var videoCount = 0, videoIndex = 0;
-			for (var i = 0; i < this.allVideos.length; i++) {
-				if (this.allVideos[i].tag !== 'img') {
-					videoCount++;
-					videoIndex = i;
-				}
-			}
+		if (videoCount === 1) {
 
-			if (videoCount === 1) {
+			// only one video -> maximize that
+			this.maximizeVideo(this.allVideos[videoIndex].path);
 
-				// only one video -> maximize that
-				this.maximizeVideo(this.allVideos[videoIndex].path);
-
-			}
-			else {
-
-				// multiple or zero video elements -> let user choose via overlays
-				this.addOverlays();
-
-			}
 		}
 		else {
 
-			// no videos or images found
-			if (this.stage === "maximized") {
-				window.top.postMessage({
-					message: 'tc_requestEndFullscreen'
-				}, '*');
-			}
+			// multiple or zero video elements -> let user choose via overlays
+			this.addOverlays();
 
 		}
+	}
+	else {
+
+		// no videos or images found
+		if (this.stage === "maximized") {
+			window.top.postMessage({
+				message: 'tc_requestEndFullscreen'
+			}, '*');
+		}
+
 	}
 }
 
@@ -838,7 +866,9 @@ TabCinema.handleMutations = function(mutations)
 TabCinema.handleVideoRemoved = function()
 {
 	// find next video to maximize if current one is removed
-	this.findVideos([]);
+	this.findVideos([], () => {
+		this.maximize();
+	});
 }
 
 
@@ -1245,7 +1275,9 @@ TabCinema.toggle = function()
 	switch(this.state)
 	{
 		case 'normal':
-			this.findVideos([]);
+			this.findVideos([], () => {
+				this.maximize();
+			});
 			break;
 		case 'maximized':
 			this.minimizeVideo();
@@ -1265,7 +1297,9 @@ TabCinema.setFullscreen = function(fullscreen)
 	{
 		if(this.state === 'normal')
 		{
-			this.findVideos([]);
+			this.findVideos([], () => {
+				this.maximize();
+			});
 		}
 	}
 	else
